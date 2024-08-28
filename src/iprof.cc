@@ -46,7 +46,8 @@ extern "C" {
 QEMU_PLUGIN_EXPORT int qemu_plugin_version = QEMU_PLUGIN_VERSION;
 
 namespace iprof {
-namespace detail::llvm_sv {
+
+namespace llvm_ext {
 /// A view that collects and prints a few performance numbers.
 class SummaryView : public llvm::mca::View {
   const llvm::MCSchedModel &SM;
@@ -153,7 +154,7 @@ public:
     return JO;
   }
 };
-} // namespace detail::llvm_sv
+} // namespace llvm_ext
 
 namespace detail::wyhash {
 
@@ -517,9 +518,9 @@ static void IProfOnExit(qemu_plugin_id_t id, void *userdata) {
     llvm::mca::Context MCtx(*MRI, *STI);
     auto P = MCtx.createDefaultPipeline(PO, SrcMgr, *CB);
 
-    std::unique_ptr<detail::llvm_sv::SummaryView> SV =
-        std::make_unique<detail::llvm_sv::SummaryView>(STI->getSchedModel(),
-                                                       Insts, PO.DispatchWidth);
+    std::unique_ptr<llvm_ext::SummaryView> SV =
+        std::make_unique<llvm_ext::SummaryView>(STI->getSchedModel(), Insts,
+                                                PO.DispatchWidth);
     P->addEventListener(SV.get());
     llvm::Expected<unsigned> Cycles = P->run();
     assert(Cycles);
@@ -552,9 +553,9 @@ static void IProfOnExit(qemu_plugin_id_t id, void *userdata) {
     llvm::mca::Context MCtx(*MRI, *STI);
     auto P = MCtx.createDefaultPipeline(PO, SrcMgr, *CB);
 
-    std::unique_ptr<detail::llvm_sv::SummaryView> SV =
-        std::make_unique<detail::llvm_sv::SummaryView>(STI->getSchedModel(),
-                                                       Insts, PO.DispatchWidth);
+    std::unique_ptr<llvm_ext::SummaryView> SV =
+        std::make_unique<llvm_ext::SummaryView>(STI->getSchedModel(), Insts,
+                                                PO.DispatchWidth);
     P->addEventListener(SV.get());
 
     for (const llvm::MCInst &I : Insts) {
@@ -562,7 +563,7 @@ static void IProfOnExit(qemu_plugin_id_t id, void *userdata) {
           IB.createInstruction(I, Instruments);
       assert(Inst);
       SrcMgr.addInst(std::move(Inst.get()));
-      llvm::Expected<unsigned> Cycles= P->run();
+      llvm::Expected<unsigned> Cycles = P->run();
       assert(Cycles || Cycles.errorIsA<llvm::mca::InstStreamPause>());
     }
 
