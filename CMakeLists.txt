@@ -21,6 +21,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 list(APPEND IPROF_COMPILE_FLAGS "-Wall")
 list(APPEND IPROF_COMPILE_FLAGS "-Wextra")
 list(APPEND IPROF_COMPILE_FLAGS "-Wno-unused-parameter")
+list(APPEND IPROF_COMPILE_FLAGS "-Wno-unused-function")
 list(APPEND IPROF_COMPILE_FLAGS "-Werror")
 list(APPEND IPROF_COMPILE_FLAGS "-fno-semantic-interposition")
 list(APPEND IPROF_COMPILE_FLAGS "-fvisibility=hidden")
@@ -89,7 +90,7 @@ include_directories(${IPROF_GLIB_HEADER})
 find_path(
   IPROF_GLIBCONF_HEADER
   NAMES "glibconfig.h"
-  PATH_SUFFIXES "lib/x86_64-linux-gnu/glib-2.0/include"
+#  PATH_SUFFIXES "lib/x86_64-linux-gnu/glib-2.0/include"
 )
 message(STATUS "Found GLIBCONF ${IPROF_GLIBCONF_HEADER}")
 include_directories(${IPROF_GLIBCONF_HEADER})
